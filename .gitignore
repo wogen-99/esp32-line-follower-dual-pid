@@ -216,3 +216,31 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+# =====================
+# MicroPython / ESP32
+# =====================
+*.mpy
+
+# Firmware / board files
+firmware/
+*.bin
+*.elf
+*.hex
+*.uf2
+
+# Serial / debug logs
+serial_logs/
+debug_output/
+*.log
+
+# Private config / secrets
+secrets.py
+wifi_config.py
+config_private.py
+private_config.py
+
+# Temporary backup files
+*.tmp
+*.bak
+*.backup
+*~
