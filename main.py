@@ -25,18 +25,17 @@ encoder_R = Encoder(1, Pin(18, Pin.IN), Pin(19, Pin.IN))
 ENC_LEFT_REVERSE = False
 ENC_RIGHT_REVERSE = False
 
-PULSES_PER_SECOND_AT_100 = 91688.5    # 100%输出时编码器每秒脉冲数，需实测标定
+PULSES_PER_SECOND_AT_100 = 96801.0    # 100%输出时编码器每秒脉冲数，需实测标定
 
 # ===================== 循迹参数 =====================
 
-LINE_THRESHOLD = 130
-WEIGHTS = [-4, -2, 0, 2, 4]
+LINE_THRESHOLD = 105
+WEIGHTS = [-4, -2, 0, 2, 6]
 
-BASE_SPEED = 80                      # 单位：百分比速度，不是PWM；允许大于100，但最终会按标定换算成编码器目标脉冲速度
+BASE_SPEED = 75                      # 单位：百分比速度，不是PWM；允许大于100，但最终会按标定换算成编码器目标脉冲速度
 MAX_SPEED = 100                       # 100%速度对应 PULSES_PER_SECOND_AT_100
-LOST_TURN_SPEED = 30
+LOST_TURN_SPEED = 78
 
-LOST_DEBOUNCE_COUNT = 2  # 新增：连续2个控制周期五路都未检测到黑线，才真正判定为脱线
 
 KEEP_LAST_ACTION_WHEN_LOST = 0 #丢线后动作
 LOST_ACTION_SCALE = 1.0
@@ -44,7 +43,7 @@ LOST_ACTION_MAX_MS = 800
 LOST_ACTION_SAFE_SPEED = 35
 
 # 外环 PID
-KP = 22.0
+KP = 16.0
 KI = 0.0
 KD = 18.0
 
@@ -58,7 +57,7 @@ INNER_KD = 0.02
 INNER_INTEGRAL_LIMIT = 100.0
 
 CONTROL_PERIOD_MS = 20
-DEBUG_PRINT = True
+DEBUG_PRINT = 0
 
 # ===================== 硬件初始化 =====================
 
@@ -90,8 +89,6 @@ last_left_target = BASE_SPEED
 last_right_target = BASE_SPEED
 last_action_valid = False
 lost_start_time = None
-
-lost_debounce_count = 0  # 新增：连续未检测到黑线的次数
 
 left_measured_speed = 0.0
 right_measured_speed = 0.0
@@ -384,34 +381,12 @@ def get_lost_line_action():
 def line_follow_step(dt_ms):
     global last_left_target, last_right_target
     global last_action_valid, lost_start_time
-    global lost_debounce_count
 
     update_measured_wheel_speed(dt_ms)
 
     error, raw_values, active = read_line_error()
 
     if error is None:
-        # 新增：第一次未检测到黑线时，先保持上一次有效动作；
-        # 只有连续 LOST_DEBOUNCE_COUNT 次未检测到黑线，才进入原来的找线逻辑。
-        lost_debounce_count += 1
-
-        if lost_debounce_count < LOST_DEBOUNCE_COUNT and last_action_valid:
-            left_target = last_left_target
-            right_target = last_right_target
-            left_cmd, right_cmd = apply_inner_speed_control(left_target, right_target)
-
-            return (
-                raw_values,
-                active,
-                None,
-                0,
-                left_target,
-                right_target,
-                left_cmd,
-                right_cmd,
-                False
-            )
-
         left_target, right_target = get_lost_line_action()
         left_cmd, right_cmd = apply_inner_speed_control(left_target, right_target)
 
@@ -427,8 +402,6 @@ def line_follow_step(dt_ms):
             True
         )
 
-    # 新增：重新检测到黑线后，清空脱线消抖计数
-    lost_debounce_count = 0
     lost_start_time = None
 
     correction_percent = outer_pid_output(error)
