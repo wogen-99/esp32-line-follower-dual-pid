@@ -28,6 +28,15 @@ Main components:
 * Battery power supply
 * Robot chassis
 
+## Firmware Requirement
+
+This project requires an ESP32 MicroPython firmware that supports `machine.Encoder`.
+
+If your firmware does not provide `machine.Encoder`, the program will fail at:
+
+```python
+from machine import ADC, Pin, PWM, Timer, Encoder
+
 ## Pin Configuration
 
 ### ADC Line Sensors
