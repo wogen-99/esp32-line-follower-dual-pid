@@ -272,3 +272,22 @@ Run it on ESP32 using a MicroPython tool such as Thonny, ampy, mpremote, or anot
 ## License
 
 This project is for learning and experimental use.
+## Quick Start
+
+1. Flash a compatible MicroPython firmware to ESP32.
+2. Connect the line sensors, motors, motor driver, and encoders according to the pin table.
+3. Upload `main.py` to the ESP32.
+4. Reset the ESP32.
+5. Open the serial monitor and check debug output.
+
+Example debug fields:
+
+```text
+raw
+line
+err
+corr_percent
+target_count
+meas_count
+pwm_percent
+lost
